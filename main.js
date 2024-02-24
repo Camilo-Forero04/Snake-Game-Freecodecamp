@@ -18,6 +18,7 @@ let gameInterval;
 let gameSpeedDelay = 200;
 let gameStarted = false;
 let highScore = 0;
+let currentScore = snake.length - 1;
 
 // Audio variables
 const gameOverAudio = "gameOver.mp3";
@@ -117,7 +118,7 @@ function startGame() {
     }, gameSpeedDelay);
 }
 
-// Key press event listener
+// Key press event listener, keeping track of the movment
 function handleKeyPress(event) {
     if ((!gameStarted && event.code === 'Space') || (!gameStarted && event.key === ' ')) {
         startGame();
@@ -154,7 +155,7 @@ function handleKeyPress(event) {
         }
     }
 }
-
+//listening when the user presses a key, different when the user unpresses a key, then it would be keyup
 document.addEventListener('keydown', handleKeyPress);
 
 function increaseSpeed() {
@@ -168,7 +169,7 @@ function increaseSpeed() {
         gameSpeedDelay -= 1;
     }
 }
-
+//check if the player coallides with him/herself or the walls 
 function checkCollision() {
     const head = snake[0];
     if (head.x < 1 || head.x > gridSize || head.y < 1 || head.y > gridSize) {
@@ -192,43 +193,55 @@ function resetGame() {
 }
 
 function updateScore() {
-    const currentScore = snake.length - 1;
+    currentScore=snake.length-1;
     score.textContent = currentScore.toString().padStart(3, '0')
 }
-
 function stopGame() {
     playGameOverSound();
     stopSong();
-    clearInterval(gameInterval);
+    clearInterval(gameInterval);//stops the game loop
     gameStarted = false;
     instruction.style.display = 'block';
     logo.style.display = 'block';
 }
-
+//Updating highscore and saving it in localStorage to display it even if the player reload the page, and retreving in the HTML
 function updateHighScore() {
-    const currentScore = snake.length - 1;
+    currentScore = snake.length - 1;
     if (currentScore > highScore) {
         highScore = currentScore;
         highScoreText.textContent = highScore.toString().padStart(3, '0');
+        localStorage.setItem('highScore',highScore);
     }
     highScoreText.style.display = 'block';
 }
-
+//playing the background song in loop
 function playBackgroundMusic() {
     backgroundMusicAudio.loop = true;
     backgroundMusicAudio.play();
 }
-
+//making a sound whenever the snake eats a fruit
 function playFoodSound() {
     foodSoundAudio = new Audio(foodSound);
     foodSoundAudio.play();
 }
-
+//making a sound whenever the player looses
 function playGameOverSound() {
     gameOverAudioAudio = new Audio(gameOverAudio);
     gameOverAudioAudio.play();
 }
+//pausing the bakground song and reinitializing to 0 to play it from 0 when I start another match
 function stopSong(){
     backgroundMusicAudio.pause();
     backgroundMusicAudio.currentTime = 0;
 }
+
+// Retrieve high score from local storage when loaded
+window.addEventListener('load', () => {
+    const storedHighScore = localStorage.getItem('highScore');
+    if (storedHighScore !== null) {
+        highScore = parseInt(storedHighScore);
+        highScoreText.textContent = highScore.toString().padStart(3, '0');
+    }else{
+        highScoreText.style.display = 'none';
+    }
+});
